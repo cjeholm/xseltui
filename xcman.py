@@ -20,6 +20,7 @@ def main(stdscr):
 
     curses.use_default_colors()     # use terminal colors
     curses.curs_set(0)              # hide the cursor
+    stdscr.nodelay(1)
 
     # Set colors
     i = 0
@@ -62,6 +63,9 @@ def main(stdscr):
 
         stdscr.refresh()
         time.sleep(0.5)
+
+        if stdscr.getch() == ord('q'):
+            exit()
 
 
 if __name__ == "__main__":
