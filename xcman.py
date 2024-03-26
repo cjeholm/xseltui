@@ -44,7 +44,7 @@ def main(stdscr):
         if len(xclipHistory) > 9:
             xclipHistory.pop(-1)
 
-        stdscr.clear()                  # clear screen
+        stdscr.erase()                  # clear screen
         stdscr.addstr(1, 5, clean(xclipLatest), curses.color_pair(7)) # Active clipboard
 
         # Write line numbers
