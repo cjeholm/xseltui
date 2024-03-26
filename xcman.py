@@ -37,15 +37,17 @@ def main(stdscr):
         if xclipLatest in xclipHistory:
             pass
         else:
-            # xclipHistory.append(xclipLatest)
+            # Insert latest at the beginning on list
             xclipHistory.insert(0, xclipLatest)
 
+        # Maintain max length of list
         if len(xclipHistory) > 9:
             xclipHistory.pop(-1)
 
         stdscr.clear()                  # clear screen
         stdscr.addstr(1, 5, clean(xclipLatest), curses.color_pair(7)) # Active clipboard
 
+        # Write line numbers
         lineNumber = 0
         while lineNumber < historyLength:
             if lineNumber == 0:
@@ -54,30 +56,34 @@ def main(stdscr):
                 stdscr.addstr(1 + lineNumber, 2, str(lineNumber), curses.color_pair(14))
             lineNumber += 1
 
+        # Write the history list
         lineNumber = 1
         for item in xclipHistory:
             stdscr.addstr(1 + lineNumber, 5, clean(item), curses.color_pair(15))
             lineNumber += 1
 
+        # Write info text at the bottom
         stdscr.addstr(12, 2, "(1-9) selects a buffer", curses.color_pair(14))
         stdscr.addstr(13, 2, "(x)   toggles Delete Mode", curses.color_pair(14))
         stdscr.addstr(14, 2, "(q)   quit", curses.color_pair(14))
 
+        # Keypress fetching
         pressedKey = ''
 
         try:
             pressedKey = stdscr.getkey()
-            stdscr.addstr(15, 2, pressedKey, curses.color_pair(2))
+            # stdscr.addstr(15, 2, pressedKey, curses.color_pair(1))
+            if int(pressedKey) <= 9 and int(pressedKey) >= 1:
+                os.popen(f'echo -n "{xclipHistory[int(pressedKey) - 1]}" | xclip -i -selection clipboard')
         except Exception:
             pass
 
         if pressedKey == 'q':
             exit()
 
-        time.sleep(0.5)
+        time.sleep(0.1)
         stdscr.refresh()
 
 
 if __name__ == "__main__":
-    # main()
     wrapper(main)
