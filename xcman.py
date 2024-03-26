@@ -6,6 +6,16 @@ from curses import wrapper
 
 historyLength = 10
 
+
+# Truncate and remove linebreaks from list items
+def clean(input):
+    maxLength = 40
+    if len(input) > maxLength:
+        input = str(input[:maxLength]) + f" ... [{len(input)}]"
+    output = input.strip().replace("\n", "\\")
+    return output
+
+
 def main(stdscr):
 
     curses.use_default_colors()     # use terminal colors
@@ -32,7 +42,7 @@ def main(stdscr):
             xclipHistory.pop(-1)
 
         stdscr.clear()                  # clear screen
-        stdscr.addstr(1, 5, str(xclipLatest), curses.color_pair(7)) # Active clipboard
+        stdscr.addstr(1, 5, clean(xclipLatest), curses.color_pair(7)) # Active clipboard
 
         lineNumber = 0
         while lineNumber < historyLength:
@@ -44,11 +54,11 @@ def main(stdscr):
 
         lineNumber = 1
         for item in xclipHistory:
-            stdscr.addstr(1 + lineNumber, 5, str(item), curses.color_pair(15))
+            stdscr.addstr(1 + lineNumber, 5, clean(item), curses.color_pair(15))
             lineNumber += 1
 
-        stdscr.addstr(12, 2, "Keys (1-9) selects a buffer", curses.color_pair(14))
-        stdscr.addstr(13, 2, "(x) toggles Delete Mode", curses.color_pair(14))
+        stdscr.addstr(12, 2, "(1-9) selects a buffer", curses.color_pair(14))
+        stdscr.addstr(13, 2, "(x)   toggles Delete Mode", curses.color_pair(14))
 
         stdscr.refresh()
         time.sleep(0.5)
