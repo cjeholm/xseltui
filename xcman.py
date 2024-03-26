@@ -21,6 +21,7 @@ def main(stdscr):
     curses.use_default_colors()     # use terminal colors
     curses.curs_set(0)              # hide the cursor
     stdscr.nodelay(1)
+    stdscr.keypad(1)
 
     # Set colors
     i = 0
@@ -60,12 +61,21 @@ def main(stdscr):
 
         stdscr.addstr(12, 2, "(1-9) selects a buffer", curses.color_pair(14))
         stdscr.addstr(13, 2, "(x)   toggles Delete Mode", curses.color_pair(14))
+        stdscr.addstr(14, 2, "(q)   quit", curses.color_pair(14))
 
-        stdscr.refresh()
-        time.sleep(0.5)
+        pressedKey = ''
 
-        if stdscr.getch() == ord('q'):
+        try:
+            pressedKey = stdscr.getkey()
+            stdscr.addstr(15, 2, pressedKey, curses.color_pair(2))
+        except Exception:
+            pass
+
+        if pressedKey == 'q':
             exit()
+
+        time.sleep(0.5)
+        stdscr.refresh()
 
 
 if __name__ == "__main__":
