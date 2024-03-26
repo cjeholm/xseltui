@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+# xseltui by Conny Holm 2024
+# TUI clipboard manager for x using xsel or xclip
+
 import time
 import os
 import curses
@@ -6,8 +10,8 @@ from curses import wrapper
 
 historyLength = 10
 
-readClipboard = 'xclip -o -sel c'
-setClipboard = 'xclip -i -sel c'
+readClipboard = 'xsel -ob'
+setClipboard = 'xsel -ib'
 
 
 # Truncate and remove linebreaks from list items
@@ -55,7 +59,7 @@ def main(stdscr):
             xclipHistory.pop(-1)
 
         stdscr.erase()                  # clear screen
-        stdscr.addstr(1, 5, clean(xclipLatest), curses.color_pair(3)) # Active clipboard
+        stdscr.addstr(1, 5, clean(xclipLatest), curses.color_pair(3))  # Active clipboard
 
         # Write line numbers
         lineNumber = 0
