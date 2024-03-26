@@ -6,7 +6,6 @@ from curses import wrapper
 
 historyLength = 10
 
-
 # Truncate and remove linebreaks from list items
 def clean(input):
     maxLength = 40
@@ -22,6 +21,8 @@ def main(stdscr):
     curses.curs_set(0)              # hide the cursor
     stdscr.nodelay(1)
     stdscr.keypad(1)
+
+    deleteMode = False
 
     # Set colors
     i = 0
@@ -63,9 +64,14 @@ def main(stdscr):
             lineNumber += 1
 
         # Write info text at the bottom
-        stdscr.addstr(12, 2, "(1-9) selects a buffer", curses.color_pair(14))
-        stdscr.addstr(13, 2, "(x)   toggles Delete Mode", curses.color_pair(14))
-        stdscr.addstr(14, 2, "(q)   quit", curses.color_pair(14))
+        if deleteMode is False:
+            stdscr.addstr(12, 2, "(1-9) set clipboard", curses.color_pair(14))
+            stdscr.addstr(13, 2, "(x)   toggle Delete Mode", curses.color_pair(14))
+            stdscr.addstr(14, 2, "(q)   quit", curses.color_pair(14))
+
+        if deleteMode is True:
+            stdscr.addstr(12, 2, "(1-9) select a buffer to delete", curses.color_pair(1))
+            stdscr.addstr(13, 2, "(x)   cancel Delete Mode", curses.color_pair(14))
 
         # Keypress fetching
         pressedKey = ''
@@ -74,13 +80,24 @@ def main(stdscr):
             pressedKey = stdscr.getkey()
             # stdscr.addstr(15, 2, pressedKey, curses.color_pair(1))
             if int(pressedKey) <= 9 and int(pressedKey) >= 1:
-                os.popen(f'echo -n "{xclipHistory[int(pressedKey) - 1]}" | xclip -i -selection clipboard')
+                if deleteMode is True:
+                    xclipHistory.pop(int(pressedKey) - 1)
+                    deleteMode = False
+                else:
+                    os.popen(f'echo -n "{xclipHistory[int(pressedKey) - 1]}" | xclip -i -selection clipboard')
         except Exception:
             pass
+
+        if pressedKey == 'x':
+            if deleteMode is False:
+                deleteMode = True
+            else:
+                deleteMode = False
 
         if pressedKey == 'q':
             exit()
 
+        # Sleep and loop
         time.sleep(0.1)
         stdscr.refresh()
 
