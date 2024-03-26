@@ -15,12 +15,13 @@ def clean(input):
     return output
 
 
+# The main function
 def main(stdscr):
 
     curses.use_default_colors()     # use terminal colors
     curses.curs_set(0)              # hide the cursor
-    stdscr.nodelay(1)
-    stdscr.keypad(1)
+    stdscr.nodelay(1)               # Don't wait for keypress to loop. Redraws windows when resized.
+    stdscr.keypad(1)                # Something with keypress idk
 
     deleteMode = False
 
@@ -33,20 +34,24 @@ def main(stdscr):
     xclipHistory = []
     print(xclipHistory)
 
+    # Main l00p
     while True:
-        xclipLatest = os.popen('xclip -o -sel c').read()
-        if xclipLatest in xclipHistory:
+        try:
+            xclipLatest = os.popen('xclip -o -sel c').read()
+            if xclipLatest in xclipHistory:
+                pass
+            else:
+                # Insert latest at the beginning on list
+                xclipHistory.insert(0, xclipLatest)
+        except Exception:
             pass
-        else:
-            # Insert latest at the beginning on list
-            xclipHistory.insert(0, xclipLatest)
 
         # Maintain max length of list
         if len(xclipHistory) > 9:
             xclipHistory.pop(-1)
 
         stdscr.erase()                  # clear screen
-        stdscr.addstr(1, 5, clean(xclipLatest), curses.color_pair(7)) # Active clipboard
+        stdscr.addstr(1, 5, clean(xclipLatest), curses.color_pair(3)) # Active clipboard
 
         # Write line numbers
         lineNumber = 0
