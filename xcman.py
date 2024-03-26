@@ -6,6 +6,10 @@ from curses import wrapper
 
 historyLength = 10
 
+readClipboard = 'xclip -o -sel c'
+setClipboard = 'xclip -i -sel c'
+
+
 # Truncate and remove linebreaks from list items
 def clean(input):
     maxLength = 40
@@ -37,7 +41,7 @@ def main(stdscr):
     # Main l00p
     while True:
         try:
-            xclipLatest = os.popen('xclip -o -sel c').read()
+            xclipLatest = os.popen(readClipboard).read()
             if xclipLatest in xclipHistory:
                 pass
             else:
@@ -70,7 +74,7 @@ def main(stdscr):
 
         # Write info text at the bottom
         if deleteMode is False:
-            stdscr.addstr(12, 2, "(1-9) set clipboard", curses.color_pair(14))
+            stdscr.addstr(12, 2, "(1-9) set system clipboard", curses.color_pair(14))
             stdscr.addstr(13, 2, "(x)   toggle Delete Mode", curses.color_pair(14))
             stdscr.addstr(14, 2, "(q)   quit", curses.color_pair(14))
 
@@ -89,7 +93,7 @@ def main(stdscr):
                     xclipHistory.pop(int(pressedKey) - 1)
                     deleteMode = False
                 else:
-                    os.popen(f'echo -n "{xclipHistory[int(pressedKey) - 1]}" | xclip -i -selection clipboard')
+                    os.popen(f'echo -n "{xclipHistory[int(pressedKey) - 1]}" | {setClipboard}')
         except Exception:
             pass
 
