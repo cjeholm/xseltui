@@ -15,8 +15,12 @@ setClipboard = 'xsel -ib'
 
 
 # Truncate and remove linebreaks from list items
-def clean(input):
-    maxLength = 40
+def clean(cols, input):
+    # maxLength = 40
+    if cols < 22:
+        maxLength = 10
+    else:
+        maxLength = cols - 18
     if len(input) > maxLength:
         input = str(input[:maxLength]) + f" ... [{len(input)}]"
     output = input.strip().replace("\n", "\\")
@@ -53,13 +57,16 @@ def main(stdscr):
                 xclipHistory.insert(0, xclipLatest)
         except Exception:
             pass
-
+        
+        # Get rows and cols for linebreaking
+        rows, cols = stdscr.getmaxyx()
+        
         # Maintain max length of list
         if len(xclipHistory) > 9:
             xclipHistory.pop(-1)
 
         stdscr.erase()                  # clear screen
-        stdscr.addstr(1, 5, clean(xclipLatest), curses.color_pair(3))  # Active clipboard
+        stdscr.addstr(1, 5, clean(cols, xclipLatest), curses.color_pair(3))  # Active clipboard
 
         # Write line numbers
         lineNumber = 0
@@ -73,7 +80,7 @@ def main(stdscr):
         # Write the history list
         lineNumber = 1
         for item in xclipHistory:
-            stdscr.addstr(1 + lineNumber, 5, clean(item), curses.color_pair(15))
+            stdscr.addstr(1 + lineNumber, 5, clean(cols, item), curses.color_pair(15))
             lineNumber += 1
 
         # Write info text at the bottom
