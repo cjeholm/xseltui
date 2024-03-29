@@ -104,7 +104,9 @@ def main(stdscr):
                     xclipHistory.pop(int(pressedKey) - 1)
                     deleteMode = False
                 else:
-                    os.popen(f'echo -n "{xclipHistory[int(pressedKey) - 1]}" | {setClipboard}')
+                    toClipboard = xclipHistory[int(pressedKey) - 1]
+                    toClipboard = toClipboard.replace("`", "\`")
+                    os.popen(f'echo -n "{toClipboard}" | {setClipboard}')
         except Exception:
             pass
 
