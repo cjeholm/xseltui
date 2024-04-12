@@ -15,9 +15,9 @@ READ_CLIPBOARD = 'xsel -ob'
 SET_CLIPBOARD = 'xsel -ib'
 
 
-# Truncate and remove linebreaks from list items
 def clean(cols, list_item):
-    # maxLength = 40
+    '''Truncate and remove linebreaks from list items'''
+
     if cols < 22:
         max_length = 10
     else:
@@ -28,8 +28,8 @@ def clean(cols, list_item):
     return list_item.strip().replace("\n", "\\")
 
 
-# The main function
 def main(stdscr):
+    '''The main function'''
 
     curses.use_default_colors()     # use terminal colors
     curses.curs_set(0)              # hide the cursor
