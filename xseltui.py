@@ -4,27 +4,28 @@
 # TUI clipboard manager for x using xsel or xclip
 
 import time
+import sys
 import os
 import curses
 from curses import wrapper
 
-historyLength = 10
+HISTORY_LENGTH = 10
 
-readClipboard = 'xsel -ob'
-setClipboard = 'xsel -ib'
+READ_CLIPBOARD = 'xsel -ob'
+SET_CLIPBOARD = 'xsel -ib'
 
 
 # Truncate and remove linebreaks from list items
-def clean(cols, input):
+def clean(cols, list_item):
     # maxLength = 40
     if cols < 22:
-        maxLength = 10
+        max_length = 10
     else:
-        maxLength = cols - 18
-    if len(input) > maxLength:
-        input = str(input[:maxLength]) + f" ... [{len(input)}]"
-    output = input.strip().replace("\n", "\\")
-    return output
+        max_length = cols - 18
+    if len(list_item) > max_length:
+        list_item = str(list_item[:max_length]) + f" ... [{len(list_item)}]"
+
+    return list_item.strip().replace("\n", "\\")
 
 
 # The main function
@@ -35,7 +36,7 @@ def main(stdscr):
     stdscr.nodelay(1)               # Don't wait for keypress to loop. Redraws windows when resized.
     stdscr.keypad(1)                # Something with keypress idk
 
-    deleteMode = False
+    delete_mode = False
 
     # Set colors
     i = 0
@@ -43,81 +44,77 @@ def main(stdscr):
         curses.init_pair(i, i, -1)
         i += 1
 
-    xclipHistory = []
-    print(xclipHistory)
+    xsel_history = []
 
     # Main l00p
     while True:
         try:
-            xclipLatest = os.popen(readClipboard).read()
-            if xclipLatest in xclipHistory:
+            xsel_latest = os.popen(READ_CLIPBOARD).read()
+            if xsel_latest in xsel_history:
                 pass
             else:
                 # Insert latest at the beginning on list
-                xclipHistory.insert(0, xclipLatest)
+                xsel_history.insert(0, xsel_latest)
         except Exception:
             pass
-        
+
         # Get rows and cols for linebreaking
         rows, cols = stdscr.getmaxyx()
-        
+
         # Maintain max length of list
-        if len(xclipHistory) > 9:
-            xclipHistory.pop(-1)
+        if len(xsel_history) > 9:
+            xsel_history.pop(-1)
 
         stdscr.erase()                  # clear screen
-        stdscr.addstr(1, 5, clean(cols, xclipLatest), curses.color_pair(3))  # Active clipboard
+        stdscr.addstr(1, 5, clean(cols, xsel_latest), curses.color_pair(3))  # Active clipboard
 
         # Write line numbers
-        lineNumber = 0
-        while lineNumber < historyLength:
-            if lineNumber == 0:
-                stdscr.addstr(1 + lineNumber, 2, ">", curses.color_pair(3))
+        line_number = 0
+        while line_number < HISTORY_LENGTH:
+            if line_number == 0:
+                stdscr.addstr(1 + line_number, 2, ">", curses.color_pair(3))
             else:
-                stdscr.addstr(1 + lineNumber, 2, str(lineNumber), curses.color_pair(14))
-            lineNumber += 1
+                stdscr.addstr(1 + line_number, 2, str(line_number), curses.color_pair(14))
+            line_number += 1
 
         # Write the history list
-        lineNumber = 1
-        for item in xclipHistory:
-            stdscr.addstr(1 + lineNumber, 5, clean(cols, item), curses.color_pair(15))
-            lineNumber += 1
+        line_number = 1
+        for item in xsel_history:
+            stdscr.addstr(1 + line_number, 5, clean(cols, item), curses.color_pair(15))
+            line_number += 1
 
         # Write info text at the bottom
-        if deleteMode is False:
+        if delete_mode is False:
             stdscr.addstr(12, 2, "(1-9) set system clipboard", curses.color_pair(14))
             stdscr.addstr(13, 2, "(x)   toggle Delete Mode", curses.color_pair(14))
             stdscr.addstr(14, 2, "(q)   quit", curses.color_pair(14))
 
-        if deleteMode is True:
+        if delete_mode is True:
             stdscr.addstr(12, 2, "(1-9) select a buffer to delete", curses.color_pair(1))
             stdscr.addstr(13, 2, "(x)   cancel Delete Mode", curses.color_pair(14))
 
         # Keypress fetching
-        pressedKey = ''
+        pressed_key = ''
 
         try:
-            pressedKey = stdscr.getkey()
+            pressed_key = stdscr.getkey()
             # stdscr.addstr(15, 2, pressedKey, curses.color_pair(1))
-            if int(pressedKey) <= 9 and int(pressedKey) >= 1:
-                if deleteMode is True:
-                    xclipHistory.pop(int(pressedKey) - 1)
-                    deleteMode = False
+            if int(pressed_key) <= 9 and int(pressed_key) >= 1:
+                if delete_mode is True:
+                    xsel_history.pop(int(pressed_key) - 1)
+                    delete_mode = False
                 else:
-                    toClipboard = xclipHistory[int(pressedKey) - 1]
-                    toClipboard = toClipboard.replace("`", "\`")
-                    os.popen(f'echo -n "{toClipboard}" | {setClipboard}')
+                    to_clipboard = xsel_history[int(pressed_key) - 1]
+                    to_clipboard = to_clipboard.replace("`", "\`")
+                    os.popen(f'echo -n "{to_clipboard}" | {SET_CLIPBOARD}')
         except Exception:
             pass
 
-        if pressedKey == 'x':
-            if deleteMode is False:
-                deleteMode = True
-            else:
-                deleteMode = False
+        if pressed_key == 'x':
+            delete_mode = not delete_mode
 
-        if pressedKey == 'q':
-            exit()
+        if pressed_key == 'q':
+            sys.exit()
 
         # Sleep and loop
         time.sleep(0.1)
